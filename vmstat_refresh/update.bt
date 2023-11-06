@@ -1,0 +1,69 @@
+#!/usr/bin/bpftrace
+
+BEGIN
+{
+	printf("Tracing updates to node_page_state\n");
+}
+
+kprobe:__mod_node_page_state
+/arg1 == 26/
+{
+    printf("__mod_node_page_state: %d, diff = %d\n", arg1, arg2);
+    @[kstack] = count();
+}
+
+kprobe:mod_node_page_state
+/arg1 == 26/
+{
+    printf("mod_node_page_state: %d, diff = %d\n", arg1, arg2);
+    @[kstack] = count();
+}
+
+kprobe:__inc_node_state
+/arg1 == 26/
+{
+    printf("__inc_node_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:__inc_node_page_state
+/arg1 == 26/
+{
+    printf("__inc_node_page_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:inc_node_state
+/arg1 == 26/
+{
+    printf("inc_node_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:inc_node_page_state
+/arg1 == 26/
+{
+    printf("inc_node_page_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:__dec_node_state
+/arg1 == 26/
+{
+    printf("__dec_node_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:__dec_node_page_state
+/arg1 == 26/
+{
+    printf("__dec_node_page_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}
+
+kprobe:dec_node_page_state
+/arg1 == 26/
+{
+    printf("dec_node_page_state: %d, diff = %d\n", arg1, 1);
+    @[kstack] = count();
+}

@@ -1,0 +1,57 @@
+import os
+import sys
+import time
+
+from drgn import (
+  container_of,
+  cast
+)
+from drgn.helpers.linux.fs import (
+  for_each_mount,
+  inode_path
+)
+from drgn.helpers.linux.list import (
+  list_for_each_entry,
+  list_empty,
+  hlist_for_each_entry
+)
+from drgn.helpers.linux.mm import (
+  PageCompound,
+  PageMappedToDisk,
+  compound_head
+)
+from drgn.helpers.linux.radixtree import (
+  radix_tree_for_each
+)
+
+def page_folio(page):
+    return cast("struct folio *", compound_head(page))
+
+if len(sys.argv) == 1:
+    path = '/'
+else:
+    path = sys.argv[1]
+
+mnt = None
+for mnt in for_each_mount(prog, dst=path):
+    pass
+
+if mnt is None:
+    sys.exit(f'No filesystem mounted at {path}')
+
+sb = mnt.mnt.mnt_sb
+for inode in list_for_each_entry('struct inode', sb.s_inodes.address_of_(),
+                                 'i_sb_list'):
+
+    for i, p in radix_tree_for_each(inode.i_data.i_pages):
+        p = cast("struct page *", p)
+        try:
+          folio = page_folio(p)
+          order = folio._folio_order
+
+          print(f'folio order: {folio._folio_nr_pages}')
+          if PageCompound(p):
+            print(f'folio order: {order}')
+        except:
+          continue;
+
